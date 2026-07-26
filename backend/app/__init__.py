@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 # Load variables from the .env file (like DATABASE_URL) into the environment
 load_dotenv()
 
+
 # Create the SQLAlchemy object here, at module level, so other files
 # (like models.py) can import it with "from app import db"
 db = SQLAlchemy()
