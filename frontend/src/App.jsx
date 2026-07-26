@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
+import Footer from './components/Footer'
 import ServiceCard from './components/ServiceCard'
 import './App.css'
 
@@ -80,6 +81,7 @@ function App() {
           ))}
         </div>
       </section>
+      <Footer />
     </div>
   )
 }
