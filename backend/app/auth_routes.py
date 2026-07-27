@@ -15,23 +15,22 @@ from app.models import Customer, Admin
 auth = Blueprint("auth", __name__)
 
 
+# ---------- Customer Auth ----------
+
 @auth.route("/api/customer/signup", methods=["POST"])
 def customer_signup():
     """Create a new customer account."""
     data = request.get_json()
 
-    # Basic validation — make sure required fields were actually sent
     required_fields = ["name", "email", "password", "phone"]
     for field in required_fields:
         if not data.get(field):
             return jsonify({"error": f"Missing required field: {field}"}), 400
 
-    # Check if a customer with this email already exists
     existing = Customer.query.filter_by(email=data["email"]).first()
     if existing:
         return jsonify({"error": "An account with this email already exists"}), 409
 
-    # Hash the password — NEVER store the real password
     hashed_password = generate_password_hash(data["password"])
 
     new_customer = Customer(
@@ -39,7 +38,7 @@ def customer_signup():
         email=data["email"],
         password_hash=hashed_password,
         phone=data["phone"],
-        company_name=data.get("company_name"),  # optional field
+        company_name=data.get("company_name"),
     )
 
     db.session.add(new_customer)
@@ -61,13 +60,10 @@ def customer_login():
 
     customer = Customer.query.filter_by(email=email).first()
 
-    # check_password_hash compares the submitted password against the stored hash.
-    # We check "customer exists AND password matches" in one step, on purpose —
-    # this avoids revealing whether the email exists at all if login fails.
     if not customer or not check_password_hash(customer.password_hash, password):
         return jsonify({"error": "Invalid email or password"}), 401
 
-    login_user(customer)  # Starts the session, sets the login cookie
+    login_user(customer)
 
     return jsonify({
         "message": "Login successful",
@@ -79,5 +75,67 @@ def customer_login():
 @login_required
 def customer_logout():
     """Log out the currently logged-in customer."""
+    logout_user()
+    return jsonify({"message": "Logged out successfully"}), 200
+
+
+# ---------- Admin Auth ----------
+
+@auth.route("/api/admin/signup", methods=["POST"])
+def admin_signup():
+    """Create a new admin account."""
+    data = request.get_json()
+
+    required_fields = ["name", "email", "password"]
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+
+    existing = Admin.query.filter_by(email=data["email"]).first()
+    if existing:
+        return jsonify({"error": "An account with this email already exists"}), 409
+
+    hashed_password = generate_password_hash(data["password"])
+
+    new_admin = Admin(
+        name=data["name"],
+        email=data["email"],
+        password_hash=hashed_password,
+    )
+
+    db.session.add(new_admin)
+    db.session.commit()
+
+    return jsonify({"message": "Admin account created successfully"}), 201
+
+
+@auth.route("/api/admin/login", methods=["POST"])
+def admin_login():
+    """Log in an existing admin."""
+    data = request.get_json()
+
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
+
+    admin = Admin.query.filter_by(email=email).first()
+
+    if not admin or not check_password_hash(admin.password_hash, password):
+        return jsonify({"error": "Invalid email or password"}), 401
+
+    login_user(admin)
+
+    return jsonify({
+        "message": "Login successful",
+        "user": {"id": admin.id, "name": admin.name, "email": admin.email, "type": "admin"}
+    }), 200
+
+
+@auth.route("/api/admin/logout", methods=["POST"])
+@login_required
+def admin_logout():
+    """Log out the currently logged-in admin."""
     logout_user()
     return jsonify({"message": "Logged out successfully"}), 200
