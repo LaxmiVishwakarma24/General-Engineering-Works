@@ -3,6 +3,8 @@ import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Footer from './components/Footer'
 import ServiceCard from './components/ServiceCard'
+import Login from './components/Login'
+import Signup from './components/Signup'
 import './App.css'
 
 const SERVICE_ICONS = {
@@ -26,6 +28,12 @@ function App() {
 
   const [services, setServices] = useState([])
   const [servicesError, setServicesError] = useState(null)
+
+  // Tracks which "view" is currently shown: 'home', 'login', or 'signup'
+  const [currentView, setCurrentView] = useState('home')
+
+  // Tracks the currently logged-in user (null if nobody is logged in)
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     fetch('http://127.0.0.1:5000/api/health')
@@ -53,34 +61,75 @@ function App() {
       })
   }, [])
 
+  const handleLoginSuccess = (userData) => {
+    setUser(userData)
+    setCurrentView('home') // send them back to the homepage after logging in
+  }
+
+  const handleLogout = async () => {
+    const endpoint = user.type === 'admin'
+      ? 'http://127.0.0.1:5000/api/admin/logout'
+      : 'http://127.0.0.1:5000/api/customer/logout'
+
+    try {
+      await fetch(endpoint, {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } catch (err) {
+      console.error('Logout error:', err)
+    }
+
+    setUser(null)
+  }
+
   return (
     <div className="app">
-      <Navbar />
-      <Hero />
+      <Navbar
+        user={user}
+        onLoginClick={() => setCurrentView('login')}
+        onSignupClick={() => setCurrentView('signup')}
+        onLogoutClick={handleLogout}
+      />
 
-      {/* Temporary dev-only status bar — will be removed before launch */}
-      <section className="connection-status">
-        <p>
-          Backend status: <strong>{apiStatus}</strong> — {apiMessage}
-        </p>
-      </section>
+      {currentView === 'login' && (
+        <Login onLoginSuccess={handleLoginSuccess} />
+      )}
 
-      <section className="services-section">
-        <h2>Our Services</h2>
+      {currentView === 'signup' && (
+        <Signup onSignupSuccess={() => setCurrentView('login')} />
+      )}
 
-        {servicesError && <p className="error-text">{servicesError}</p>}
+      {currentView === 'home' && (
+        <>
+          <Hero />
 
-        <div className="services-grid">
-          {services.map((service) => (
-            <ServiceCard
-              key={service.id}
-              name={service.name}
-              description={service.description}
-              iconName={SERVICE_ICONS[service.name]}
-            />
-          ))}
-        </div>
-      </section>
+          {/* Temporary dev-only status bar — will be removed before launch */}
+          <section className="connection-status">
+            <p>
+              Backend status: <strong>{apiStatus}</strong> — {apiMessage}
+            </p>
+          </section>
+
+          <section className="services-section">
+            <h2>Our Services</h2>
+
+            {servicesError && <p className="error-text">{servicesError}</p>}
+
+            <div className="services-grid">
+              {services.map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  name={service.name}
+                  description={service.description}
+                  iconName={SERVICE_ICONS[service.name]}
+                />
+              ))}
+            </div>
+          </section>
+        </>
+      )}
+
       <Footer />
     </div>
   )
