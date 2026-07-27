@@ -8,10 +8,11 @@ PostgreSQL tables.
 """
 
 from datetime import datetime
-from app import db  # 'db' is the SQLAlchemy object we will create in __init__.py
+from flask_login import UserMixin
+from app import db
 
 
-class Admin(db.Model):
+class Admin(UserMixin, db.Model):
     __tablename__ = "admins"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -20,8 +21,14 @@ class Admin(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def get_id(self):
+        # Flask-Login calls this to get the session identifier.
+        # We prefix with "admin-" so __init__.py's user_loader knows
+        # which table to look this ID up in.
+        return f"admin-{self.id}"
 
-class Customer(db.Model):
+
+class Customer(UserMixin, db.Model):
     __tablename__ = "customers"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -33,6 +40,9 @@ class Customer(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     quote_requests = db.relationship("QuoteRequest", backref="customer", lazy=True)
+
+    def get_id(self):
+        return f"customer-{self.id}"
 
 
 class Service(db.Model):
