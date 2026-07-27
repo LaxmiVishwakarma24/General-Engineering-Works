@@ -1,27 +1,24 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 /**
- * Login form with a dropdown to choose between Customer and Admin.
- * Calls the appropriate backend endpoint based on the selected type.
+ * Admin login form. PRIVATE page — not linked anywhere in the public navbar.
+ * Accessed only by directly visiting /admin-login.
  */
-function Login({ onLoginSuccess }) {
-  const [userType, setUserType] = useState('customer')
+function AdminLogin({ onLoginSuccess }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
     setLoading(true)
 
-    const endpoint = userType === 'admin'
-      ? 'http://127.0.0.1:5000/api/admin/login'
-      : 'http://127.0.0.1:5000/api/customer/login'
-
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch('http://127.0.0.1:5000/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -37,6 +34,7 @@ function Login({ onLoginSuccess }) {
       }
 
       onLoginSuccess(data.user)
+      navigate('/') // redirect to homepage after successful login
     } catch (err) {
       setError('Could not connect to the server')
       console.error('Login error:', err)
@@ -47,35 +45,17 @@ function Login({ onLoginSuccess }) {
 
   return (
     <div className="auth-form-container">
-      <h2>Login</h2>
+      <h2>Admin Login</h2>
 
       <form onSubmit={handleSubmit} className="auth-form">
         <label>
-          Login as
-          <select value={userType} onChange={(e) => setUserType(e.target.value)}>
-            <option value="customer">Customer</option>
-            <option value="admin">Admin</option>
-          </select>
-        </label>
-
-        <label>
           Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
 
         <label>
           Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </label>
 
         {error && <p className="auth-error">{error}</p>}
@@ -88,4 +68,4 @@ function Login({ onLoginSuccess }) {
   )
 }
 
-export default Login
+export default AdminLogin

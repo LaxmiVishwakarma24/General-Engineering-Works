@@ -1,11 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 /**
- * Signup form with a dropdown to choose between Customer and Admin.
- * Phone/company fields only apply to Customer signup.
+ * Customer signup form. Public page — Admin accounts are never created here.
  */
-function Signup({ onSignupSuccess }) {
-  const [userType, setUserType] = useState('customer')
+function Signup() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -14,6 +13,7 @@ function Signup({ onSignupSuccess }) {
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -21,17 +21,10 @@ function Signup({ onSignupSuccess }) {
     setSuccessMessage('')
     setLoading(true)
 
-    const endpoint = userType === 'admin'
-      ? 'http://127.0.0.1:5000/api/admin/signup'
-      : 'http://127.0.0.1:5000/api/customer/signup'
-
-    // Build the request body — admin signup doesn't need phone/company_name
-    const requestBody = userType === 'admin'
-      ? { name, email, password }
-      : { name, email, password, phone, company_name: companyName }
+    const requestBody = { name, email, password, phone, company_name: companyName }
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch('http://127.0.0.1:5000/api/customer/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -46,8 +39,12 @@ function Signup({ onSignupSuccess }) {
         return
       }
 
-      setSuccessMessage('Account created successfully! You can now log in.')
-      if (onSignupSuccess) onSignupSuccess()
+      setSuccessMessage('Account created successfully! Redirecting to login...')
+
+      // Give the user a moment to see the success message, then redirect to login
+      setTimeout(() => {
+        navigate('/login')
+      }, 1500)
     } catch (err) {
       setError('Could not connect to the server')
       console.error('Signup error:', err)
@@ -62,31 +59,13 @@ function Signup({ onSignupSuccess }) {
 
       <form onSubmit={handleSubmit} className="auth-form">
         <label>
-          Sign up as
-          <select value={userType} onChange={(e) => setUserType(e.target.value)}>
-            <option value="customer">Customer</option>
-            <option value="admin">Employee</option>
-          </select>
-        </label>
-
-        <label>
           Full Name
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
         </label>
 
         <label>
           Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
 
         <label>
@@ -100,29 +79,15 @@ function Signup({ onSignupSuccess }) {
           />
         </label>
 
-        {/* Only show phone and company fields for Customer signup */}
-        {userType === 'customer' && (
-          <>
-            <label>
-              Phone
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-              />
-            </label>
+        <label>
+          Phone
+          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+        </label>
 
-            <label>
-              Company Name (optional)
-              <input
-                type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-              />
-            </label>
-          </>
-        )}
+        <label>
+          Company Name (optional)
+          <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+        </label>
 
         {error && <p className="auth-error">{error}</p>}
         {successMessage && <p className="auth-success">{successMessage}</p>}

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Footer from './components/Footer'
 import ServiceCard from './components/ServiceCard'
-import Login from './components/Login'
+import CustomerLogin from './components/CustomerLogin'
+import AdminLogin from './components/AdminLogin'
 import Signup from './components/Signup'
 import './App.css'
 
@@ -22,6 +24,39 @@ const SERVICE_ICONS = {
   'Custom Components': 'Puzzle',
 }
 
+// The homepage content — Hero + Services grid, extracted into its own
+// component so it can be rendered specifically at the "/" route.
+function HomePage({ apiStatus, apiMessage, services, servicesError }) {
+  return (
+    <>
+      <Hero />
+
+      <section className="connection-status">
+        <p>
+          Backend status: <strong>{apiStatus}</strong> — {apiMessage}
+        </p>
+      </section>
+
+      <section className="services-section">
+        <h2>Our Services</h2>
+
+        {servicesError && <p className="error-text">{servicesError}</p>}
+
+        <div className="services-grid">
+          {services.map((service) => (
+            <ServiceCard
+              key={service.id}
+              name={service.name}
+              description={service.description}
+              iconName={SERVICE_ICONS[service.name]}
+            />
+          ))}
+        </div>
+      </section>
+    </>
+  )
+}
+
 function App() {
   const [apiMessage, setApiMessage] = useState('Loading...')
   const [apiStatus, setApiStatus] = useState('checking')
@@ -29,10 +64,6 @@ function App() {
   const [services, setServices] = useState([])
   const [servicesError, setServicesError] = useState(null)
 
-  // Tracks which "view" is currently shown: 'home', 'login', or 'signup'
-  const [currentView, setCurrentView] = useState('home')
-
-  // Tracks the currently logged-in user (null if nobody is logged in)
   const [user, setUser] = useState(null)
 
   useEffect(() => {
@@ -63,7 +94,6 @@ function App() {
 
   const handleLoginSuccess = (userData) => {
     setUser(userData)
-    setCurrentView('home') // send them back to the homepage after logging in
   }
 
   const handleLogout = async () => {
@@ -84,54 +114,30 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <Navbar
-        user={user}
-        onLoginClick={() => setCurrentView('login')}
-        onSignupClick={() => setCurrentView('signup')}
-        onLogoutClick={handleLogout}
-      />
+    <BrowserRouter>
+      <div className="app">
+        <Navbar user={user} onLogoutClick={handleLogout} />
 
-      {currentView === 'login' && (
-        <Login onLoginSuccess={handleLoginSuccess} />
-      )}
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <HomePage
+                apiStatus={apiStatus}
+                apiMessage={apiMessage}
+                services={services}
+                servicesError={servicesError}
+              />
+            }
+          />
+          <Route path="/login" element={<CustomerLogin onLoginSuccess={handleLoginSuccess} />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/admin-login" element={<AdminLogin onLoginSuccess={handleLoginSuccess} />} />
+        </Routes>
 
-      {currentView === 'signup' && (
-        <Signup onSignupSuccess={() => setCurrentView('login')} />
-      )}
-
-      {currentView === 'home' && (
-        <>
-          <Hero />
-
-          {/* Temporary dev-only status bar — will be removed before launch */}
-          <section className="connection-status">
-            <p>
-              Backend status: <strong>{apiStatus}</strong> — {apiMessage}
-            </p>
-          </section>
-
-          <section className="services-section">
-            <h2>Our Services</h2>
-
-            {servicesError && <p className="error-text">{servicesError}</p>}
-
-            <div className="services-grid">
-              {services.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  name={service.name}
-                  description={service.description}
-                  iconName={SERVICE_ICONS[service.name]}
-                />
-              ))}
-            </div>
-          </section>
-        </>
-      )}
-
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </BrowserRouter>
   )
 }
 
