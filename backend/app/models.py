@@ -11,19 +11,27 @@ from datetime import datetime
 from app import db  # 'db' is the SQLAlchemy object we will create in __init__.py
 
 
+class Admin(db.Model):
+    __tablename__ = "admins"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(150), nullable=False, unique=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 class Customer(db.Model):
     __tablename__ = "customers"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), nullable=False, unique=True)
+    password_hash = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     company_name = db.Column(db.String(150), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # One customer can have many quote requests.
-    # This does not create a column — it creates a convenient Python-side
-    # link so we can write customer.quote_requests to get all their requests.
     quote_requests = db.relationship("QuoteRequest", backref="customer", lazy=True)
 
 
@@ -54,8 +62,6 @@ class QuoteRequest(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    # Foreign keys — these columns store the id of a row in another table,
-    # linking this quote request to a specific customer and service.
     customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"), nullable=False)
     service_id = db.Column(db.Integer, db.ForeignKey("services.id"), nullable=False)
 
