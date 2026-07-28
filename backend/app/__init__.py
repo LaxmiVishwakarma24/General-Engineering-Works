@@ -42,6 +42,9 @@ def create_app():
     from app.auth_routes import auth
     app.register_blueprint(auth)
 
+    from app.product_routes import products_bp
+    app.register_blueprint(products_bp)
+
     from app import models
 
     # Tells Flask-Login how to load a user from the session.
