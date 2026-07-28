@@ -14,6 +14,7 @@ function Navbar({ user, onLogoutClick }) {
       </div>
       <ul className="navbar-links">
         <li><Link to="/">Home</Link></li>
+        <li><Link to="/products">Products</Link></li>
         <li>Services</li>
         <li>Machines</li>
         <li>Contact</li>

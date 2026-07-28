@@ -7,6 +7,7 @@ import ServiceCard from './components/ServiceCard'
 import CustomerLogin from './components/CustomerLogin'
 import AdminLogin from './components/AdminLogin'
 import Signup from './components/Signup'
+import ProductsPage from './components/ProductsPage'
 import './App.css'
 
 const SERVICE_ICONS = {
@@ -133,6 +134,7 @@ function App() {
           <Route path="/login" element={<CustomerLogin onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/admin-login" element={<AdminLogin onLoginSuccess={handleLoginSuccess} />} />
+          <Route path="/products" element={<ProductsPage />} />
         </Routes>
 
         <Footer />
