@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
  * Home/Services/Machines/Contact are still placeholders (real routing for
  * those specific pages comes later — only Login/Signup/Home are wired up now).
  * Note: intentionally NO link to /admin-login — that page is private/unlisted.
+ * Cart link only shows for logged-in customers, not admins.
  */
 function Navbar({ user, onLogoutClick }) {
   return (
@@ -18,6 +19,10 @@ function Navbar({ user, onLogoutClick }) {
         <li>Services</li>
         <li>Machines</li>
         <li>Contact</li>
+
+        {user && user.type === 'customer' && (
+          <li><Link to="/cart">Cart</Link></li>
+        )}
 
         {user ? (
           <>

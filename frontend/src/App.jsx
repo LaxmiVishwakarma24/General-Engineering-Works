@@ -8,6 +8,7 @@ import CustomerLogin from './components/CustomerLogin'
 import AdminLogin from './components/AdminLogin'
 import Signup from './components/Signup'
 import ProductsPage from './components/ProductsPage'
+import CartPage from './components/CartPage'
 import './App.css'
 
 const SERVICE_ICONS = {
@@ -25,8 +26,6 @@ const SERVICE_ICONS = {
   'Custom Components': 'Puzzle',
 }
 
-// The homepage content — Hero + Services grid, extracted into its own
-// component so it can be rendered specifically at the "/" route.
 function HomePage({ apiStatus, apiMessage, services, servicesError }) {
   return (
     <>
@@ -68,7 +67,7 @@ function App() {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/api/health')
+    fetch('http://localhost:5000/api/health')
       .then((response) => response.json())
       .then((data) => {
         setApiMessage(data.message)
@@ -82,7 +81,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/api/services')
+    fetch('http://localhost:5000/api/services')
       .then((response) => response.json())
       .then((data) => {
         setServices(data)
@@ -99,8 +98,8 @@ function App() {
 
   const handleLogout = async () => {
     const endpoint = user.type === 'admin'
-      ? 'http://127.0.0.1:5000/api/admin/logout'
-      : 'http://127.0.0.1:5000/api/customer/logout'
+      ? 'http://localhost:5000/api/admin/logout'
+      : 'http://localhost:5000/api/customer/logout'
 
     try {
       await fetch(endpoint, {
@@ -134,7 +133,8 @@ function App() {
           <Route path="/login" element={<CustomerLogin onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/admin-login" element={<AdminLogin onLoginSuccess={handleLoginSuccess} />} />
-          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/products" element={<ProductsPage user={user} />} />
+          <Route path="/cart" element={<CartPage user={user} />} />
         </Routes>
 
         <Footer />
