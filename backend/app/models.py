@@ -116,13 +116,30 @@ class Product(db.Model):
 
     @property
     def status(self):
-        """
-        Automatically calculated — never stored directly, always
-        reflects the current stock_quantity vs minimum_stock.
-        """
         if self.stock_quantity == 0:
             return "out_of_stock"
         elif self.stock_quantity <= self.minimum_stock:
             return "low_stock"
         else:
             return "available"
+
+
+class Cart(db.Model):
+    __tablename__ = "cart"
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    items = db.relationship("CartItem", backref="cart", lazy=True, cascade="all, delete-orphan")
+
+
+class CartItem(db.Model):
+    __tablename__ = "cart_items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    cart_id = db.Column(db.Integer, db.ForeignKey("cart.id"), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+
+    product = db.relationship("Product")
