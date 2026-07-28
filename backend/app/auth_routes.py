@@ -3,6 +3,9 @@ auth_routes.py
 
 Handles signup and login for Customers and Admins.
 Uses Werkzeug for password hashing and Flask-Login for session management.
+
+Note: There is intentionally NO public admin signup route. The single Admin
+account is created once, manually, using backend/create_admin.py.
 """
 
 from flask import Blueprint, request, jsonify
@@ -80,34 +83,8 @@ def customer_logout():
 
 
 # ---------- Admin Auth ----------
-
-@auth.route("/api/admin/signup", methods=["POST"])
-def admin_signup():
-    """Create a new admin account."""
-    data = request.get_json()
-
-    required_fields = ["name", "email", "password"]
-    for field in required_fields:
-        if not data.get(field):
-            return jsonify({"error": f"Missing required field: {field}"}), 400
-
-    existing = Admin.query.filter_by(email=data["email"]).first()
-    if existing:
-        return jsonify({"error": "An account with this email already exists"}), 409
-
-    hashed_password = generate_password_hash(data["password"])
-
-    new_admin = Admin(
-        name=data["name"],
-        email=data["email"],
-        password_hash=hashed_password,
-    )
-
-    db.session.add(new_admin)
-    db.session.commit()
-
-    return jsonify({"message": "Admin account created successfully"}), 201
-
+# No signup route here on purpose — Admin accounts are created via
+# backend/create_admin.py, run manually, never through the public API.
 
 @auth.route("/api/admin/login", methods=["POST"])
 def admin_login():
