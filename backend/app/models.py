@@ -2,12 +2,9 @@
 models.py
 
 Defines the database tables for General Engineering Works as Python classes.
-Each class = one table. Each class attribute = one column.
-SQLAlchemy uses these definitions to create and interact with the actual
-PostgreSQL tables.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_login import UserMixin
 from app import db
 
@@ -143,3 +140,41 @@ class CartItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=1)
 
     product = db.relationship("Product")
+
+
+class Order(db.Model):
+    __tablename__ = "orders"
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"), nullable=False)
+
+    status = db.Column(db.String(50), nullable=False, default="Pending")
+    total_amount = db.Column(db.Numeric(10, 2), nullable=False)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    cancel_deadline = db.Column(db.DateTime, nullable=False)
+
+    delay_reason = db.Column(db.Text, nullable=True)
+    expected_delivery_date = db.Column(db.DateTime, nullable=True)
+
+    items = db.relationship("OrderItem", backref="order", lazy=True, cascade="all, delete-orphan")
+    customer = db.relationship("Customer")
+
+    @property
+    def can_cancel(self):
+        """True if the order is still within its 24-hour cancellation window."""
+        return datetime.utcnow() < self.cancel_deadline
+
+
+class OrderItem(db.Model):
+    __tablename__ = "order_items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
+
+    quantity = db.Column(db.Integer, nullable=False)
+    price_at_purchase = db.Column(db.Numeric(10, 2), nullable=False)
+
+    product = db.relationship("Product")
+    
