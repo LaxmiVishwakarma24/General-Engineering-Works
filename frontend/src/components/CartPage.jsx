@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 function CartPage({ user }) {
   const [cart, setCart] = useState(null)
   const [error, setError] = useState('')
+  const [checkingOut, setCheckingOut] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -55,6 +56,32 @@ function CartPage({ user }) {
     }
   }
 
+  const handleCheckout = async () => {
+    setCheckingOut(true)
+    setError('')
+
+    try {
+      const response = await fetch('http://localhost:5000/api/orders/checkout', {
+        method: 'POST',
+        credentials: 'include',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Checkout failed')
+        setCheckingOut(false)
+        return
+      }
+
+      navigate('/orders')
+    } catch (err) {
+      setError('Could not connect to the server')
+      console.error('Checkout error:', err)
+      setCheckingOut(false)
+    }
+  }
+
   if (!cart) {
     return <div className="cart-page"><p>Loading cart...</p></div>
   }
@@ -95,6 +122,10 @@ function CartPage({ user }) {
           <div className="cart-total">
             <strong>Total: ₹{cart.total.toFixed(2)}</strong>
           </div>
+
+          <button className="checkout-btn" onClick={handleCheckout} disabled={checkingOut}>
+            {checkingOut ? 'Placing Order...' : 'Checkout'}
+          </button>
         </>
       )}
     </div>

@@ -82,6 +82,68 @@ def customer_logout():
     return jsonify({"message": "Logged out successfully"}), 200
 
 
+@auth.route("/api/customer/profile", methods=["GET"])
+@login_required
+def get_profile():
+    """Return the logged-in customer's current profile info."""
+    if current_user.get_id().split("-")[0] != "customer":
+        return jsonify({"error": "Only customers have a profile here"}), 403
+
+    return jsonify({
+        "name": current_user.name,
+        "email": current_user.email,
+        "phone": current_user.phone,
+        "company_name": current_user.company_name,
+    }), 200
+
+
+@auth.route("/api/customer/profile", methods=["PUT"])
+@login_required
+def update_profile():
+    """Update the logged-in customer's name, phone, and company name (not email)."""
+    if current_user.get_id().split("-")[0] != "customer":
+        return jsonify({"error": "Only customers can update this profile"}), 403
+
+    data = request.get_json()
+
+    if not data.get("name") or not data.get("phone"):
+        return jsonify({"error": "Name and phone are required"}), 400
+
+    current_user.name = data["name"]
+    current_user.phone = data["phone"]
+    current_user.company_name = data.get("company_name")
+
+    db.session.commit()
+
+    return jsonify({"message": "Profile updated successfully"}), 200
+
+
+@auth.route("/api/customer/change-password", methods=["POST"])
+@login_required
+def change_password():
+    """Change the logged-in customer's password, after verifying their current one."""
+    if current_user.get_id().split("-")[0] != "customer":
+        return jsonify({"error": "Only customers can use this"}), 403
+
+    data = request.get_json()
+    current_password = data.get("current_password")
+    new_password = data.get("new_password")
+
+    if not current_password or not new_password:
+        return jsonify({"error": "Current and new password are required"}), 400
+
+    if not check_password_hash(current_user.password_hash, current_password):
+        return jsonify({"error": "Current password is incorrect"}), 401
+
+    if len(new_password) < 6:
+        return jsonify({"error": "New password must be at least 6 characters"}), 400
+
+    current_user.password_hash = generate_password_hash(new_password)
+    db.session.commit()
+
+    return jsonify({"message": "Password changed successfully"}), 200
+
+
 # ---------- Admin Auth ----------
 # No signup route here on purpose — Admin accounts are created via
 # backend/create_admin.py, run manually, never through the public API.

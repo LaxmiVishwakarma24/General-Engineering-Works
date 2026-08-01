@@ -551,3 +551,255 @@ body {
   border-top: 2px solid #eee;
   padding-top: 1rem;
 }
+
+/* Checkout button */
+.checkout-btn {
+  width: 100%;
+  margin-top: 1.5rem;
+  background-color: #b5651d;
+  color: #ffffff;
+  border: none;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.checkout-btn:hover:not(:disabled) {
+  background-color: #a05619;
+}
+
+.checkout-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Orders Page */
+.orders-page {
+  padding: 1rem 0 2rem 0;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.orders-page h1 {
+  text-align: center;
+  color: #1e2a38;
+  margin-bottom: 2rem;
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.order-card {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.order-card-header h3 {
+  color: #1e2a38;
+}
+
+.order-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 12px;
+  white-space: nowrap;
+  background-color: #eef1f4;
+  color: #444;
+}
+
+.order-status-pending {
+  background-color: #fff3e0;
+  color: #b5651d;
+}
+
+.order-status-cancelled {
+  background-color: #fdeaea;
+  color: #c0392b;
+}
+
+.order-status-waiting-for-stock {
+  background-color: #fdeaea;
+  color: #c0392b;
+}
+
+.order-status-delivered {
+  background-color: #e3f5e6;
+  color: #2e7d32;
+}
+
+.order-date {
+  font-size: 0.85rem;
+  color: #5a6472;
+  margin-bottom: 1rem;
+}
+
+.order-items-list {
+  list-style: none;
+  margin-bottom: 1rem;
+}
+
+.order-items-list li {
+  font-size: 0.9rem;
+  color: #444;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-total {
+  font-weight: 700;
+  color: #1e2a38;
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.order-delay-notice {
+  background-color: #fff3e0;
+  color: #b5651d;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.order-cancel-btn {
+  background-color: #fdeaea;
+  color: #c0392b;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.order-cancel-btn:hover {
+  background-color: #fbd5d5;
+}
+
+/* Navbar layout update — three sections: logo, center links, right auth/profile */
+.navbar {
+  justify-content: space-between;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-auth-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+/* Profile Menu */
+.profile-menu {
+  position: relative;
+}
+
+.profile-menu-trigger {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #b5651d;
+  color: #ffffff;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-menu-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.profile-menu-name {
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: #5a6472;
+  border-bottom: 1px solid #eee;
+}
+
+.profile-menu-item {
+  display: block !important;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  color: #1e2a38 !important;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none !important;
+  min-height: 20px;
+}
+
+.profile-menu-item:hover {
+  background-color: #f4f5f7;
+}
+
+.profile-menu-logout {
+  color: #c0392b;
+  border-top: 1px solid #eee;
+}
+
+
+
+/* Profile Page */
+.profile-page {
+  padding: 1rem 0 2rem 0;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.profile-page h1 {
+  text-align: center;
+  color: #1e2a38;
+  margin-bottom: 2rem;
+}
+
+.profile-section {
+  background-color: #ffffff;
+  padding: 1.5rem 2rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+}
+
+.profile-section h2 {
+  font-size: 1.1rem;
+  color: #1e2a38;
+  margin-bottom: 1rem;
+}
+
+.profile-section input:disabled {
+  background-color: #f4f5f7;
+  color: #999;
+  cursor: not-allowed;
+}
