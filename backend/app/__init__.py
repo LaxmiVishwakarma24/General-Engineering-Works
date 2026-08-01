@@ -1,4 +1,5 @@
 import os
+
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -50,6 +51,10 @@ def create_app():
 
     from app.order_routes import orders_bp
     app.register_blueprint(orders_bp)
+
+    from app.admin_product_routes import admin_products_bp
+    app.register_blueprint(admin_products_bp)
+
 
     from app import models
 
