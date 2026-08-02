@@ -55,6 +55,9 @@ def create_app():
     from app.admin_product_routes import admin_products_bp
     app.register_blueprint(admin_products_bp)
 
+    from app.payment_routes import payments_bp
+    app.register_blueprint(payments_bp)
+
 
     from app import models
 
