@@ -803,3 +803,131 @@ body {
   color: #999;
   cursor: not-allowed;
 }
+
+/* Admin Dashboard */
+.admin-page {
+  padding: 1rem 0 2rem 0;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.admin-page-header h1 {
+  color: #1e2a38;
+}
+
+.admin-add-btn {
+  background-color: #b5651d;
+  color: #ffffff;
+  border: none;
+  padding: 0.7rem 1.3rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.admin-add-btn:hover {
+  background-color: #a05619;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.admin-table th {
+  background-color: #1e2a38;
+  color: #ffffff;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+}
+
+.admin-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.admin-edit-btn,
+.admin-delete-btn {
+  border: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-right: 0.5rem;
+}
+
+.admin-edit-btn {
+  background-color: #eef1f4;
+  color: #1e2a38;
+}
+
+.admin-delete-btn {
+  background-color: #fdeaea;
+  color: #c0392b;
+}
+
+/* Modal (Add/Edit Product form popup) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.modal-content h2 {
+  margin-bottom: 1rem;
+  color: #1e2a38;
+}
+
+.modal-content textarea {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.modal-actions button {
+  flex: 1;
+}
+
+.modal-cancel-btn {
+  background-color: #eef1f4 !important;
+  color: #1e2a38 !important;
+}

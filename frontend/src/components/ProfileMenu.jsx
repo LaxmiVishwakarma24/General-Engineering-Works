@@ -2,14 +2,14 @@ import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 /**
- * ProfileMenu shows a single account icon that expands into a dropdown
- * containing My Profile, Cart, My Orders, and Logout.
+ * ProfileMenu shows a single account icon that expands into a dropdown.
+ * Shows different links depending on whether the logged-in user is a
+ * Customer (My Profile, Cart, My Orders) or an Admin (Manage Products).
  */
 function ProfileMenu({ user, onLogoutClick }) {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef(null)
 
-  // Close the dropdown if the user clicks anywhere outside of it
   useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -43,6 +43,12 @@ function ProfileMenu({ user, onLogoutClick }) {
                 My Orders
               </Link>
             </>
+          )}
+
+          {user.type === 'admin' && (
+            <Link to="/admin/products" className="profile-menu-item" onClick={() => setIsOpen(false)}>
+              Manage Products
+            </Link>
           )}
 
           <button
