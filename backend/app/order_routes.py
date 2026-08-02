@@ -5,7 +5,7 @@ API endpoints for placing and viewing orders.
 """
 
 from datetime import datetime, timedelta
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
 
 from app import db
@@ -52,9 +52,6 @@ def checkout():
     if not cart or len(cart.items) == 0:
         return jsonify({"error": "Your cart is empty"}), 400
 
-    # Check stock for every item first, to decide the order's starting status.
-    # (Per design: we don't block the order or reduce stock here — we just flag
-    # it if anything was out of stock at the time of checkout.)
     any_out_of_stock = any(item.product.stock_quantity == 0 for item in cart.items)
     initial_status = "Waiting for Stock" if any_out_of_stock else "Pending"
 
@@ -67,18 +64,17 @@ def checkout():
         cancel_deadline=datetime.utcnow() + timedelta(hours=24),
     )
     db.session.add(new_order)
-    db.session.flush()  # assigns new_order.id before we use it below
+    db.session.flush()
 
     for cart_item in cart.items:
         order_item = OrderItem(
             order_id=new_order.id,
             product_id=cart_item.product_id,
             quantity=cart_item.quantity,
-            price_at_purchase=cart_item.product.price,  # snapshot the current price
+            price_at_purchase=cart_item.product.price,
         )
         db.session.add(order_item)
 
-    # Clear the cart now that its contents have become a real order
     for cart_item in cart.items:
         db.session.delete(cart_item)
 
@@ -115,6 +111,60 @@ def cancel_order(order_id):
         return jsonify({"error": "This order can no longer be cancelled (past the 24-hour window)"}), 400
 
     order.status = "Cancelled"
+    db.session.commit()
+
+    return jsonify(serialize_order(order)), 200
+
+
+VALID_STATUSES = [
+    "Pending", "Confirmed", "Waiting for Stock", "In Production",
+    "Quality Check", "Ready for Dispatch", "Dispatched", "Delivered", "Cancelled"
+]
+
+
+@orders_bp.route("/api/admin/orders", methods=["GET"])
+@login_required
+def admin_list_orders():
+    """Admin: view all orders from every customer, most recent first."""
+    if current_user.get_id().split("-")[0] != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+
+    orders = Order.query.order_by(Order.created_at.desc()).all()
+
+    result = []
+    for order in orders:
+        order_data = serialize_order(order)
+        order_data["customer_name"] = order.customer.name
+        order_data["customer_email"] = order.customer.email
+        result.append(order_data)
+
+    return jsonify(result), 200
+
+
+@orders_bp.route("/api/admin/orders/<int:order_id>/status", methods=["PUT"])
+@login_required
+def admin_update_order_status(order_id):
+    """Admin: update an order's status, and optionally set delay info."""
+    if current_user.get_id().split("-")[0] != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+
+    order = Order.query.get(order_id)
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+
+    data = request.get_json()
+    new_status = data.get("status")
+
+    if new_status not in VALID_STATUSES:
+        return jsonify({"error": f"Invalid status. Must be one of: {', '.join(VALID_STATUSES)}"}), 400
+
+    order.status = new_status
+
+    if "delay_reason" in data:
+        order.delay_reason = data["delay_reason"]
+    if "expected_delivery_date" in data:
+        order.expected_delivery_date = datetime.fromisoformat(data["expected_delivery_date"]) if data["expected_delivery_date"] else None
+
     db.session.commit()
 
     return jsonify(serialize_order(order)), 200
