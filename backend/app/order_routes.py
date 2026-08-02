@@ -36,6 +36,7 @@ def serialize_order(order):
         "can_cancel": order.can_cancel,
         "delay_reason": order.delay_reason,
         "expected_delivery_date": order.expected_delivery_date.isoformat() if order.expected_delivery_date else None,
+        "payment_status": order.payment.status if order.payment else "Pending",
         "items": items,
     }
 

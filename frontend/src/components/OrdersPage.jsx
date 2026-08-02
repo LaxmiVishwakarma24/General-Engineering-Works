@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import PaymentForm from './PaymentForm'
 
 function OrdersPage({ user }) {
   const [orders, setOrders] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [payingOrder, setPayingOrder] = useState(null)
   const navigate = useNavigate()
 
   const loadOrders = () => {
@@ -39,7 +41,7 @@ function OrdersPage({ user }) {
       })
 
       if (response.ok) {
-        loadOrders() // refresh the list to show the updated status
+        loadOrders()
       } else {
         const data = await response.json()
         alert(data.error || 'Could not cancel order')
@@ -47,6 +49,11 @@ function OrdersPage({ user }) {
     } catch (err) {
       console.error('Cancel order error:', err)
     }
+  }
+
+  const handlePaymentComplete = () => {
+    setPayingOrder(null)
+    loadOrders()
   }
 
   if (loading) {
@@ -95,14 +102,34 @@ function OrdersPage({ user }) {
                 </p>
               )}
 
-              {order.can_cancel && order.status !== 'Cancelled' && (
-                <button className="order-cancel-btn" onClick={() => handleCancel(order.id)}>
-                  Cancel Order
-                </button>
-              )}
+              <div className="order-actions">
+                {order.can_cancel && order.status !== 'Cancelled' && (
+                  <button className="order-cancel-btn" onClick={() => handleCancel(order.id)}>
+                    Cancel Order
+                  </button>
+                )}
+
+                {order.status !== 'Cancelled' && (
+                  order.payment_status === 'Paid' ? (
+                    <span className="order-paid-badge">✓ Paid</span>
+                  ) : (
+                    <button className="order-pay-btn" onClick={() => setPayingOrder(order)}>
+                      Pay Now
+                    </button>
+                  )
+                )}
+              </div>
             </div>
           ))}
         </div>
+      )}
+
+      {payingOrder && (
+        <PaymentForm
+          order={payingOrder}
+          onPaid={handlePaymentComplete}
+          onCancel={() => setPayingOrder(null)}
+        />
       )}
     </div>
   )
