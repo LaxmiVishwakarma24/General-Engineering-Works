@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 /**
  * ProfileMenu shows a single account icon that expands into a dropdown.
  * Shows different links depending on whether the logged-in user is a
- * Customer (My Profile, Cart, My Orders) or an Admin (Manage Products).
+ * Customer (My Profile, Cart, My Orders) or an Admin (Manage Products, Manage Orders).
  */
 function ProfileMenu({ user, onLogoutClick }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -46,9 +46,14 @@ function ProfileMenu({ user, onLogoutClick }) {
           )}
 
           {user.type === 'admin' && (
-            <Link to="/admin/products" className="profile-menu-item" onClick={() => setIsOpen(false)}>
-              Manage Products
-            </Link>
+            <>
+              <Link to="/admin/products" className="profile-menu-item" onClick={() => setIsOpen(false)}>
+                Manage Products
+              </Link>
+              <Link to="/admin/orders" className="profile-menu-item" onClick={() => setIsOpen(false)}>
+                Manage Orders
+              </Link>
+            </>
           )}
 
           <button

@@ -931,3 +931,17 @@ body {
   background-color: #eef1f4 !important;
   color: #1e2a38 !important;
 }
+
+.admin-status-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.admin-order-email {
+  font-size: 0.75rem;
+  color: #999;
+}

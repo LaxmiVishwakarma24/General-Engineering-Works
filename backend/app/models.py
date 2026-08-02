@@ -159,6 +159,7 @@ class Order(db.Model):
 
     items = db.relationship("OrderItem", backref="order", lazy=True, cascade="all, delete-orphan")
     customer = db.relationship("Customer")
+    payment = db.relationship("Payment", backref="order", uselist=False, cascade="all, delete-orphan")
 
     @property
     def can_cancel(self):
@@ -177,4 +178,29 @@ class OrderItem(db.Model):
     price_at_purchase = db.Column(db.Numeric(10, 2), nullable=False)
 
     product = db.relationship("Product")
-    
+
+
+class Payment(db.Model):
+    __tablename__ = "payments"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False, unique=True)
+
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    status = db.Column(db.String(50), nullable=False, default="Pending")
+    payment_method = db.Column(db.String(50), nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    transactions = db.relationship("PaymentTransaction", backref="payment", lazy=True, cascade="all, delete-orphan")
+
+
+class PaymentTransaction(db.Model):
+    __tablename__ = "payment_transactions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    payment_id = db.Column(db.Integer, db.ForeignKey("payments.id"), nullable=False)
+
+    transaction_reference = db.Column(db.String(100), nullable=False, unique=True)
+    status = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
