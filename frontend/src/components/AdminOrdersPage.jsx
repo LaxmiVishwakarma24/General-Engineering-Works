@@ -1,154 +1,108 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Hero from './components/Hero'
-import Footer from './components/Footer'
-import ServiceCard from './components/ServiceCard'
-import CustomerLogin from './components/CustomerLogin'
-import AdminLogin from './components/AdminLogin'
-import Signup from './components/Signup'
-import ProductsPage from './components/ProductsPage'
-import CartPage from './components/CartPage'
-import OrdersPage from './components/OrdersPage'
-import ProfilePage from './components/ProfilePage'
-import AdminProductsPage from './components/AdminProductsPage'
-import AdminOrdersPage from './components/AdminOrdersPage'
-import './App.css'
+import { useNavigate } from 'react-router-dom'
 
-const SERVICE_ICONS = {
-  'Lathe Machining': 'Disc3',
-  'Drilling': 'Drill',
-  'Milling': 'Grid3x3',
-  'Welding': 'Flame',
-  'Fabrication': 'Hammer',
-  'Shaft Repair': 'Wrench',
-  'Thread Cutting': 'Component',
-  'Boring': 'CircleDot',
-  'Grinding': 'Sparkles',
-  'CNC Turning': 'Cpu',
-  'Machine Repair': 'Settings',
-  'Custom Components': 'Puzzle',
-}
+const VALID_STATUSES = [
+  "Pending", "Confirmed", "Waiting for Stock", "In Production",
+  "Quality Check", "Ready for Dispatch", "Dispatched", "Delivered", "Cancelled"
+]
 
-function HomePage({ apiStatus, apiMessage, services, servicesError }) {
-  return (
-    <>
-      <Hero />
+function AdminOrdersPage({ user }) {
+  const [orders, setOrders] = useState([])
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
 
-      <section className="connection-status">
-        <p>
-          Backend status: <strong>{apiStatus}</strong> — {apiMessage}
-        </p>
-      </section>
-
-      <section className="services-section">
-        <h2>Our Services</h2>
-
-        {servicesError && <p className="error-text">{servicesError}</p>}
-
-        <div className="services-grid">
-          {services.map((service) => (
-            <ServiceCard
-              key={service.id}
-              name={service.name}
-              description={service.description}
-              iconName={SERVICE_ICONS[service.name]}
-            />
-          ))}
-        </div>
-      </section>
-    </>
-  )
-}
-
-function App() {
-  const [apiMessage, setApiMessage] = useState('Loading...')
-  const [apiStatus, setApiStatus] = useState('checking')
-
-  const [services, setServices] = useState([])
-  const [servicesError, setServicesError] = useState(null)
-
-  const [user, setUser] = useState(null)
-
-  useEffect(() => {
-    fetch('http://localhost:5000/api/health')
+  const loadOrders = () => {
+    fetch('http://localhost:5000/api/admin/orders', {
+      credentials: 'include',
+    })
       .then((response) => response.json())
-      .then((data) => {
-        setApiMessage(data.message)
-        setApiStatus(data.status)
+      .then((data) => setOrders(data))
+      .catch((err) => {
+        setError('Could not load orders')
+        console.error(err)
       })
-      .catch((error) => {
-        setApiMessage('Could not connect to backend API')
-        setApiStatus('error')
-        console.error('Error fetching API:', error)
-      })
-  }, [])
-
-  useEffect(() => {
-    fetch('http://localhost:5000/api/services')
-      .then((response) => response.json())
-      .then((data) => {
-        setServices(data)
-      })
-      .catch((error) => {
-        setServicesError('Could not load services')
-        console.error('Error fetching services:', error)
-      })
-  }, [])
-
-  const handleLoginSuccess = (userData) => {
-    setUser(userData)
   }
 
-  const handleLogout = async () => {
-    const endpoint = user.type === 'admin'
-      ? 'http://localhost:5000/api/admin/logout'
-      : 'http://localhost:5000/api/customer/logout'
-
-    try {
-      await fetch(endpoint, {
-        method: 'POST',
-        credentials: 'include',
-      })
-    } catch (err) {
-      console.error('Logout error:', err)
+  useEffect(() => {
+    if (!user || user.type !== 'admin') {
+      navigate('/admin-login')
+      return
     }
+    loadOrders()
+  }, [user])
 
-    setUser(null)
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/admin/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (response.ok) {
+        loadOrders()
+      } else {
+        const data = await response.json()
+        alert(data.error || 'Could not update order status')
+      }
+    } catch (err) {
+      console.error('Status update error:', err)
+    }
   }
 
   return (
-    <BrowserRouter>
-      <div className="app">
-        <Navbar user={user} onLogoutClick={handleLogout} />
-
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <HomePage
-                apiStatus={apiStatus}
-                apiMessage={apiMessage}
-                services={services}
-                servicesError={servicesError}
-              />
-            }
-          />
-          <Route path="/login" element={<CustomerLogin onLoginSuccess={handleLoginSuccess} />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/admin-login" element={<AdminLogin onLoginSuccess={handleLoginSuccess} />} />
-          <Route path="/products" element={<ProductsPage user={user} />} />
-          <Route path="/cart" element={<CartPage user={user} />} />
-          <Route path="/orders" element={<OrdersPage user={user} />} />
-          <Route path="/profile" element={<ProfilePage user={user} />} />
-          <Route path="/admin/products" element={<AdminProductsPage user={user} />} />
-          <Route path="/admin/orders" element={<AdminOrdersPage user={user} />} />
-        </Routes>
-
-        <Footer />
+    <div className="admin-page">
+      <div className="admin-page-header">
+        <h1>Manage Orders</h1>
       </div>
-    </BrowserRouter>
+
+      {error && <p className="error-text">{error}</p>}
+
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Placed On</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map((order) => (
+            <tr key={order.id}>
+              <td>#{order.id}</td>
+              <td>
+                {order.customer_name}
+                <br />
+                <span className="admin-order-email">{order.customer_email}</span>
+              </td>
+              <td>
+                {order.items.map((item, idx) => (
+                  <div key={idx}>{item.name} × {item.quantity}</div>
+                ))}
+              </td>
+              <td>₹{order.total_amount.toFixed(2)}</td>
+              <td>{new Date(order.created_at).toLocaleDateString()}</td>
+              <td>
+                <select
+                  value={order.status}
+                  onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                  className="admin-status-select"
+                >
+                  {VALID_STATUSES.map((status) => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
-export default App
+export default AdminOrdersPage

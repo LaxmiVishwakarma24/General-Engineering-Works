@@ -12,6 +12,8 @@ import CartPage from './components/CartPage'
 import OrdersPage from './components/OrdersPage'
 import ProfilePage from './components/ProfilePage'
 import AdminProductsPage from './components/AdminProductsPage'
+import AdminOrdersPage from './components/AdminOrdersPage'
+import InvoicePage from './components/InvoicePage'
 import './App.css'
 
 const SERVICE_ICONS = {
@@ -139,8 +141,10 @@ function App() {
           <Route path="/products" element={<ProductsPage user={user} />} />
           <Route path="/cart" element={<CartPage user={user} />} />
           <Route path="/orders" element={<OrdersPage user={user} />} />
+          <Route path="/orders/:orderId/invoice" element={<InvoicePage user={user} />} />
           <Route path="/profile" element={<ProfilePage user={user} />} />
           <Route path="/admin/products" element={<AdminProductsPage user={user} />} />
+          <Route path="/admin/orders" element={<AdminOrdersPage user={user} />} />
         </Routes>
 
         <Footer />

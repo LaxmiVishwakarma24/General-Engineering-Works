@@ -1,16 +1,19 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * PaymentForm is a MOCK payment popup — no real card or UPI processing happens here.
  * It simulates the visual flow of a payment gateway for demonstration purposes.
+ * On successful payment, redirects to the invoice page instead of just closing.
  */
 function PaymentForm({ order, onPaid, onCancel }) {
-  const [method, setMethod] = useState('card') // 'card' or 'upi'
+  const [method, setMethod] = useState('card')
   const [cardNumber, setCardNumber] = useState('')
   const [expiry, setExpiry] = useState('')
   const [cvv, setCvv] = useState('')
   const [error, setError] = useState('')
   const [processing, setProcessing] = useState(false)
+  const navigate = useNavigate()
 
   const submitPayment = async (paymentMethodLabel) => {
     setError('')
@@ -33,6 +36,7 @@ function PaymentForm({ order, onPaid, onCancel }) {
       }
 
       onPaid()
+      navigate(`/orders/${order.id}/invoice`)
     } catch (err) {
       setError('Could not connect to the server')
       console.error('Payment error:', err)
@@ -52,7 +56,6 @@ function PaymentForm({ order, onPaid, onCancel }) {
         <p className="payment-amount">Amount: ₹{order.total_amount.toFixed(2)}</p>
         <p className="payment-mock-notice">This is a demo payment form — no real card or UPI details are processed.</p>
 
-        {/* Payment method tabs */}
         <div className="payment-method-tabs">
           <button
             type="button"
@@ -124,7 +127,6 @@ function PaymentForm({ order, onPaid, onCancel }) {
             <div className="upi-qr-placeholder">
               <svg viewBox="0 0 200 200" width="180" height="180">
                 <rect width="200" height="200" fill="#ffffff" />
-                {/* A simple pattern that visually resembles a QR code — not a real scannable code */}
                 {Array.from({ length: 10 }).map((_, row) =>
                   Array.from({ length: 10 }).map((_, col) => {
                     const seed = (row * 10 + col + order.id) % 3
