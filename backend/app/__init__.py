@@ -58,6 +58,8 @@ def create_app():
     from app.payment_routes import payments_bp
     app.register_blueprint(payments_bp)
 
+    from app.dashboard_routes import dashboard_bp
+    app.register_blueprint(dashboard_bp)
 
     from app import models
 
