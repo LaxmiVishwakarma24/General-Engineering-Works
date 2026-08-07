@@ -1,5 +1,6 @@
 import os
 
+import cloudinary
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -15,6 +16,14 @@ db = SQLAlchemy()
 
 # Create the Flask-Login manager here too, for the same reason
 login_manager = LoginManager()
+
+# Configure Cloudinary once, at module load time, using credentials from .env
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+    secure=True,
+)
 
 
 def create_app():
@@ -60,6 +69,9 @@ def create_app():
 
     from app.dashboard_routes import dashboard_bp
     app.register_blueprint(dashboard_bp)
+
+    from app.upload_routes import upload_bp
+    app.register_blueprint(upload_bp)
 
     from app import models
 

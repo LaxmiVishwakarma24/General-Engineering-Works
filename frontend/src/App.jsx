@@ -3,11 +3,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Footer from './components/Footer'
-import ServiceCard from './components/ServiceCard'
 import CustomerLogin from './components/CustomerLogin'
 import AdminLogin from './components/AdminLogin'
 import Signup from './components/Signup'
 import ProductsPage from './components/ProductsPage'
+import ServicesPage from './components/ServicesPage'
 import CartPage from './components/CartPage'
 import OrdersPage from './components/OrdersPage'
 import ProfilePage from './components/ProfilePage'
@@ -16,22 +16,7 @@ import AdminOrdersPage from './components/AdminOrdersPage'
 import InvoicePage from './components/InvoicePage'
 import './App.css'
 
-const SERVICE_ICONS = {
-  'Lathe Machining': 'Disc3',
-  'Drilling': 'Drill',
-  'Milling': 'Grid3x3',
-  'Welding': 'Flame',
-  'Fabrication': 'Hammer',
-  'Shaft Repair': 'Wrench',
-  'Thread Cutting': 'Component',
-  'Boring': 'CircleDot',
-  'Grinding': 'Sparkles',
-  'CNC Turning': 'Cpu',
-  'Machine Repair': 'Settings',
-  'Custom Components': 'Puzzle',
-}
-
-function HomePage({ apiStatus, apiMessage, services, servicesError }) {
+function HomePage({ apiStatus, apiMessage }) {
   return (
     <>
       <Hero />
@@ -41,23 +26,6 @@ function HomePage({ apiStatus, apiMessage, services, servicesError }) {
           Backend status: <strong>{apiStatus}</strong> — {apiMessage}
         </p>
       </section>
-
-      <section className="services-section">
-        <h2>Our Services</h2>
-
-        {servicesError && <p className="error-text">{servicesError}</p>}
-
-        <div className="services-grid">
-          {services.map((service) => (
-            <ServiceCard
-              key={service.id}
-              name={service.name}
-              description={service.description}
-              iconName={SERVICE_ICONS[service.name]}
-            />
-          ))}
-        </div>
-      </section>
     </>
   )
 }
@@ -65,9 +33,6 @@ function HomePage({ apiStatus, apiMessage, services, servicesError }) {
 function App() {
   const [apiMessage, setApiMessage] = useState('Loading...')
   const [apiStatus, setApiStatus] = useState('checking')
-
-  const [services, setServices] = useState([])
-  const [servicesError, setServicesError] = useState(null)
 
   const [user, setUser] = useState(null)
 
@@ -82,18 +47,6 @@ function App() {
         setApiMessage('Could not connect to backend API')
         setApiStatus('error')
         console.error('Error fetching API:', error)
-      })
-  }, [])
-
-  useEffect(() => {
-    fetch('http://localhost:5000/api/services')
-      .then((response) => response.json())
-      .then((data) => {
-        setServices(data)
-      })
-      .catch((error) => {
-        setServicesError('Could not load services')
-        console.error('Error fetching services:', error)
       })
   }, [])
 
@@ -126,19 +79,13 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={
-              <HomePage
-                apiStatus={apiStatus}
-                apiMessage={apiMessage}
-                services={services}
-                servicesError={servicesError}
-              />
-            }
+            element={<HomePage apiStatus={apiStatus} apiMessage={apiMessage} />}
           />
           <Route path="/login" element={<CustomerLogin onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/admin-login" element={<AdminLogin onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/products" element={<ProductsPage user={user} />} />
+          <Route path="/services" element={<ServicesPage />} />
           <Route path="/cart" element={<CartPage user={user} />} />
           <Route path="/orders" element={<OrdersPage user={user} />} />
           <Route path="/orders/:orderId/invoice" element={<InvoicePage user={user} />} />
