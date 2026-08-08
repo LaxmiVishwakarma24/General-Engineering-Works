@@ -17,6 +17,7 @@ import AdminOrdersPage from './components/AdminOrdersPage'
 import AdminDashboardPage from './components/AdminDashboardPage'
 import InvoicePage from './components/InvoicePage'
 import QuoteRequestPage from './components/QuoteRequestPage'
+import ContactPage from './components/ContactPage'
 import './App.css'
 
 function HomePage({ apiStatus, apiMessage }) {
@@ -98,6 +99,7 @@ function App() {
           <Route path="/admin/products" element={<AdminProductsPage user={user} />} />
           <Route path="/admin/orders" element={<AdminOrdersPage user={user} />} />
           <Route path="/request-quote" element={<QuoteRequestPage user={user} />} />
+          <Route path="/contact" element={<ContactPage />} />
         </Routes>
 
         <Footer />

@@ -76,6 +76,9 @@ def create_app():
     from app.quote_routes import quote_bp
     app.register_blueprint(quote_bp)
 
+    from app.contact_routes import contact_bp
+    app.register_blueprint(contact_bp)
+
     from app import models
 
     # Tells Flask-Login how to load a user from the session.
