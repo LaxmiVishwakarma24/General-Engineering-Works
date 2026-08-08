@@ -8,6 +8,7 @@ import AdminLogin from './components/AdminLogin'
 import Signup from './components/Signup'
 import ProductsPage from './components/ProductsPage'
 import ServicesPage from './components/ServicesPage'
+import MachinesPage from './components/MachinesPage'
 import CartPage from './components/CartPage'
 import OrdersPage from './components/OrdersPage'
 import ProfilePage from './components/ProfilePage'
@@ -86,6 +87,7 @@ function App() {
           <Route path="/admin-login" element={<AdminLogin onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/products" element={<ProductsPage user={user} />} />
           <Route path="/services" element={<ServicesPage />} />
+          <Route path="/machines" element={<MachinesPage />} />
           <Route path="/cart" element={<CartPage user={user} />} />
           <Route path="/orders" element={<OrdersPage user={user} />} />
           <Route path="/orders/:orderId/invoice" element={<InvoicePage user={user} />} />

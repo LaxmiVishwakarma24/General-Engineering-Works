@@ -1146,3 +1146,51 @@ body {
 .invoice-continue-btn:hover {
   background-color: #a05619;
 }
+
+/* Machines Page */
+.machines-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.machine-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.machine-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.machine-card-icon {
+  display: flex;
+  justify-content: center;
+  color: #b5651d;
+  margin-bottom: 0.75rem;
+}
+
+.machine-card-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #1e2a38;
+}
+
+.machine-card-description {
+  font-size: 0.9rem;
+  color: #5a6472;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+}
+
+.machine-card-specs {
+  font-size: 0.8rem;
+  color: #999;
+  border-top: 1px solid #eee;
+  padding-top: 0.75rem;
+}

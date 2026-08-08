@@ -3,7 +3,7 @@ import ProfileMenu from './ProfileMenu'
 
 /**
  * Navbar displays the site logo/name and navigation links.
- * Machines/Contact are still placeholders (pages not built yet).
+ * Contact is still a placeholder (page not built yet).
  * Note: intentionally NO link to /admin-login — that page is private/unlisted.
  * When logged in, Cart/Orders/Logout live inside the ProfileMenu dropdown
  * instead of cluttering the main navbar.
@@ -19,7 +19,7 @@ function Navbar({ user, onLogoutClick }) {
         <li><Link to="/">Home</Link></li>
         <li><Link to="/products">Products</Link></li>
         <li><Link to="/services">Services</Link></li>
-        <li>Machines</li>
+        <li><Link to="/machines">Machines</Link></li>
         <li>Contact</li>
       </ul>
 
