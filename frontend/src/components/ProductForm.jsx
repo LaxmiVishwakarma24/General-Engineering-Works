@@ -8,6 +8,8 @@ function ProductForm({ product, categories, onSaved, onCancel }) {
   const [categoryId, setCategoryId] = useState('')
   const [stockQuantity, setStockQuantity] = useState('')
   const [minimumStock, setMinimumStock] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -22,8 +24,45 @@ function ProductForm({ product, categories, onSaved, onCancel }) {
       setCategoryId(product.category.id)
       setStockQuantity(product.stock_quantity)
       setMinimumStock(5)
+      setImageUrl(product.image_url || '')
     }
   }, [product])
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    setUploading(true)
+    setError('')
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const response = await fetch('http://localhost:5000/api/admin/upload-image', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+        // Note: no Content-Type header here — the browser sets it automatically
+        // for FormData, including the required "boundary" value.
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Image upload failed')
+        setUploading(false)
+        return
+      }
+
+      setImageUrl(data.url)
+    } catch (err) {
+      setError('Could not upload image')
+      console.error('Image upload error:', err)
+    }
+
+    setUploading(false)
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -38,6 +77,7 @@ function ProductForm({ product, categories, onSaved, onCancel }) {
       category_id: parseInt(categoryId),
       stock_quantity: parseInt(stockQuantity),
       minimum_stock: parseInt(minimumStock),
+      image_url: imageUrl,
     }
 
     const url = isEditing
@@ -115,11 +155,24 @@ function ProductForm({ product, categories, onSaved, onCancel }) {
             <input type="number" min="0" value={minimumStock} onChange={(e) => setMinimumStock(e.target.value)} required />
           </label>
 
+          <label>
+            Product Image
+            <input type="file" accept="image/*" onChange={handleImageChange} disabled={uploading} />
+          </label>
+
+          {uploading && <p className="upload-status">Uploading image...</p>}
+
+          {imageUrl && (
+            <div className="image-preview">
+              <img src={imageUrl} alt="Product preview" />
+            </div>
+          )}
+
           {error && <p className="auth-error">{error}</p>}
 
           <div className="modal-actions">
             <button type="button" onClick={onCancel} className="modal-cancel-btn">Cancel</button>
-            <button type="submit" disabled={saving}>
+            <button type="submit" disabled={saving || uploading}>
               {saving ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Product'}
             </button>
           </div>

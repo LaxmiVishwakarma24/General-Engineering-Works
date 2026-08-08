@@ -1233,3 +1233,21 @@ body {
   color: #1e2a38;
   margin-bottom: 1rem;
 }
+
+.upload-status {
+  font-size: 0.85rem;
+  color: #b5651d;
+  text-align: center;
+}
+
+.image-preview {
+  display: flex;
+  justify-content: center;
+}
+
+.image-preview img {
+  max-width: 150px;
+  max-height: 150px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
