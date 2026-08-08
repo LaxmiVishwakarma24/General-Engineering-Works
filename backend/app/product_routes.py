@@ -1,11 +1,12 @@
 """
 product_routes.py
 
-API endpoints for browsing the product catalog (categories and products).
+API endpoints for browsing the product catalog (categories and products),
+and the machines showcase.
 """
 
 from flask import Blueprint, jsonify
-from app.models import Category, Product
+from app.models import Category, Product, Machine
 
 products_bp = Blueprint("products", __name__)
 
@@ -44,3 +45,22 @@ def get_products():
     ]
 
     return jsonify(products_list)
+
+
+@products_bp.route("/api/machines")
+def get_machines():
+    """Return all machines as JSON, for the public Machines showcase page."""
+    machines = Machine.query.all()
+
+    machines_list = [
+        {
+            "id": m.id,
+            "name": m.name,
+            "description": m.description,
+            "photo_url": m.photo_url,
+            "specs": m.specs,
+        }
+        for m in machines
+    ]
+
+    return jsonify(machines_list)
