@@ -1251,3 +1251,19 @@ body {
   border-radius: 8px;
   border: 1px solid #eee;
 }
+
+.services-preview-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.view-all-link {
+  color: #b5651d;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
