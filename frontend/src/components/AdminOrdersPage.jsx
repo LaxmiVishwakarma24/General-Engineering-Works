@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import DelayForm from './DelayForm'
 
 const VALID_STATUSES = [
   "Pending", "Confirmed", "Waiting for Stock", "In Production",
@@ -9,6 +10,7 @@ const VALID_STATUSES = [
 function AdminOrdersPage({ user }) {
   const [orders, setOrders] = useState([])
   const [error, setError] = useState('')
+  const [delayOrder, setDelayOrder] = useState(null)
   const navigate = useNavigate()
 
   const loadOrders = () => {
@@ -51,6 +53,11 @@ function AdminOrdersPage({ user }) {
     }
   }
 
+  const handleDelaySaved = () => {
+    setDelayOrder(null)
+    loadOrders()
+  }
+
   return (
     <div className="admin-page">
       <div className="admin-page-header">
@@ -68,6 +75,7 @@ function AdminOrdersPage({ user }) {
             <th>Total</th>
             <th>Placed On</th>
             <th>Status</th>
+            <th>Delay Info</th>
           </tr>
         </thead>
         <tbody>
@@ -97,10 +105,35 @@ function AdminOrdersPage({ user }) {
                   ))}
                 </select>
               </td>
+              <td>
+                {order.delay_reason && (
+                  <div className="admin-order-email">{order.delay_reason}</div>
+                )}
+                {order.expected_delivery_date && (
+                  <div className="admin-order-email">
+                    Expected: {new Date(order.expected_delivery_date).toLocaleDateString()}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className="admin-edit-btn"
+                  onClick={() => setDelayOrder(order)}
+                >
+                  {order.delay_reason || order.expected_delivery_date ? 'Edit Delay' : 'Set Delay'}
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {delayOrder && (
+        <DelayForm
+          order={delayOrder}
+          onSaved={handleDelaySaved}
+          onCancel={() => setDelayOrder(null)}
+        />
+      )}
     </div>
   )
 }
