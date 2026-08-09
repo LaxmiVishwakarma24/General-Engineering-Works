@@ -3,6 +3,8 @@ quote_routes.py
 
 Customer-facing endpoint for submitting a quote request, optionally with
 an attachment (drawing/blueprint) uploaded via /api/customer/upload-attachment.
+
+Also includes admin-only endpoints for viewing and updating quote requests.
 """
 
 from flask import Blueprint, request, jsonify
@@ -12,6 +14,19 @@ from app import db
 from app.models import QuoteRequest, Service
 
 quote_bp = Blueprint("quote", __name__)
+
+
+def serialize_quote_request(qr):
+    """Converts a QuoteRequest object into a JSON-friendly dictionary."""
+    return {
+        "id": qr.id,
+        "service_id": qr.service_id,
+        "service_name": qr.service.name,
+        "details": qr.details,
+        "attachment_url": qr.attachment_url,
+        "status": qr.status,
+        "created_at": qr.created_at.isoformat(),
+    }
 
 
 @quote_bp.route("/api/quote-requests", methods=["POST"])
@@ -44,3 +59,48 @@ def create_quote_request():
         "message": "Quote request submitted successfully",
         "id": quote_request.id,
     }), 201
+
+
+VALID_QUOTE_STATUSES = ["new", "reviewed", "quoted", "closed"]
+
+
+@quote_bp.route("/api/admin/quote-requests", methods=["GET"])
+@login_required
+def admin_list_quote_requests():
+    """Admin: view all quote requests from every customer, most recent first."""
+    if current_user.get_id().split("-")[0] != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+
+    quote_requests = QuoteRequest.query.order_by(QuoteRequest.created_at.desc()).all()
+
+    result = []
+    for qr in quote_requests:
+        qr_data = serialize_quote_request(qr)
+        qr_data["customer_name"] = qr.customer.name
+        qr_data["customer_email"] = qr.customer.email
+        result.append(qr_data)
+
+    return jsonify(result), 200
+
+
+@quote_bp.route("/api/admin/quote-requests/<int:quote_request_id>/status", methods=["PUT"])
+@login_required
+def admin_update_quote_request_status(quote_request_id):
+    """Admin: update a quote request's status."""
+    if current_user.get_id().split("-")[0] != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+
+    quote_request = QuoteRequest.query.get(quote_request_id)
+    if not quote_request:
+        return jsonify({"error": "Quote request not found"}), 404
+
+    data = request.get_json()
+    new_status = data.get("status")
+
+    if new_status not in VALID_QUOTE_STATUSES:
+        return jsonify({"error": f"Invalid status. Must be one of: {', '.join(VALID_QUOTE_STATUSES)}"}), 400
+
+    quote_request.status = new_status
+    db.session.commit()
+
+    return jsonify(serialize_quote_request(quote_request)), 200
