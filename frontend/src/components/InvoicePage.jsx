@@ -14,7 +14,6 @@ function InvoicePage({ user }) {
       return
     }
 
-    // Fetch all orders and find this specific one (reuses the existing endpoint)
     fetch('http://localhost:5000/api/orders', {
       credentials: 'include',
     })
@@ -32,7 +31,6 @@ function InvoicePage({ user }) {
         console.error(err)
       })
 
-    // Fetch payment details separately
     fetch(`http://localhost:5000/api/orders/${orderId}/payment`, {
       credentials: 'include',
     })
@@ -100,6 +98,10 @@ function InvoicePage({ user }) {
           <span>Total Paid</span>
           <span>₹{order.total_amount.toFixed(2)}</span>
         </div>
+
+        <a href={`http://localhost:5000/api/orders/${order.id}/invoice/pdf`} className="invoice-download-btn" target="_blank" rel="noopener noreferrer">
+          Download PDF Invoice
+        </a>
 
         <button className="invoice-continue-btn" onClick={() => navigate('/orders')}>
           Continue to My Orders

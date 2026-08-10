@@ -4,9 +4,15 @@ order_routes.py
 API endpoints for placing and viewing orders.
 """
 
+import io
 from datetime import datetime, timedelta
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 from flask_login import login_required, current_user
+
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 
 from app import db
 from app.models import Cart, Order, OrderItem
@@ -115,6 +121,80 @@ def cancel_order(order_id):
     db.session.commit()
 
     return jsonify(serialize_order(order)), 200
+
+
+@orders_bp.route("/api/orders/<int:order_id>/invoice/pdf", methods=["GET"])
+@login_required
+def download_invoice_pdf(order_id):
+    """Customer-only: generate and download a PDF invoice for one of their own orders."""
+    if current_user.get_id().split("-")[0] != "customer":
+        return jsonify({"error": "Only customers can download invoices"}), 403
+
+    order = Order.query.get(order_id)
+
+    if not order or order.customer_id != current_user.id:
+        return jsonify({"error": "Order not found"}), 404
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=50, bottomMargin=50)
+    styles = getSampleStyleSheet()
+    story = []
+
+    story.append(Paragraph("General Engineering Works", styles["Title"]))
+    story.append(Paragraph(f"Invoice — Order #{order.id}", styles["Heading2"]))
+    story.append(Spacer(1, 16))
+
+    story.append(Paragraph(f"Customer: {order.customer.name}", styles["Normal"]))
+    story.append(Paragraph(f"Email: {order.customer.email}", styles["Normal"]))
+    story.append(Paragraph(f"Order Date: {order.created_at.strftime('%d %b %Y')}", styles["Normal"]))
+    story.append(Paragraph(f"Status: {order.status}", styles["Normal"]))
+    story.append(Spacer(1, 16))
+
+    table_data = [["Item", "Quantity", "Unit Price", "Subtotal"]]
+    for item in order.items:
+        subtotal = float(item.price_at_purchase) * item.quantity
+        table_data.append([
+            item.product.name,
+            str(item.quantity),
+            f"Rs. {float(item.price_at_purchase):.2f}",
+            f"Rs. {subtotal:.2f}",
+        ])
+    table_data.append(["", "", "Total", f"Rs. {float(order.total_amount):.2f}"])
+
+    table = Table(table_data, colWidths=[220, 80, 100, 100])
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e293b")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#334155")),
+        ("ALIGN", (1, 0), (-1, -1), "CENTER"),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+        ("TOPPADDING", (0, 0), (-1, 0), 8),
+    ]))
+    story.append(table)
+    story.append(Spacer(1, 20))
+
+    payment_status = order.payment.status if order.payment else "Pending"
+    story.append(Paragraph(f"Payment Status: {payment_status}", styles["Normal"]))
+
+    if order.delay_reason:
+        story.append(Spacer(1, 8))
+        story.append(Paragraph(f"Delay Note: {order.delay_reason}", styles["Normal"]))
+    if order.expected_delivery_date:
+        story.append(Paragraph(
+            f"Expected Delivery: {order.expected_delivery_date.strftime('%d %b %Y')}", styles["Normal"]
+        ))
+
+    doc.build(story)
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"invoice_order_{order.id}.pdf",
+    )
 
 
 VALID_STATUSES = [
