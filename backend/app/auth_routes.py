@@ -13,7 +13,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 
 from app import db
-from app.models import Customer, Admin
+from app.models import Customer, Admin, Order
 
 auth = Blueprint("auth", __name__)
 
@@ -178,3 +178,30 @@ def admin_logout():
     """Log out the currently logged-in admin."""
     logout_user()
     return jsonify({"message": "Logged out successfully"}), 200
+
+
+# ---------- Admin: Customer Management ----------
+
+@auth.route("/api/admin/customers", methods=["GET"])
+@login_required
+def admin_list_customers():
+    """Admin: view all registered customers, most recently created first."""
+    if current_user.get_id().split("-")[0] != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+
+    customers = Customer.query.order_by(Customer.created_at.desc()).all()
+
+    result = []
+    for customer in customers:
+        order_count = Order.query.filter_by(customer_id=customer.id).count()
+        result.append({
+            "id": customer.id,
+            "name": customer.name,
+            "email": customer.email,
+            "phone": customer.phone,
+            "company_name": customer.company_name,
+            "created_at": customer.created_at.isoformat(),
+            "order_count": order_count,
+        })
+
+    return jsonify(result), 200
