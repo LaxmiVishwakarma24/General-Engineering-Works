@@ -82,6 +82,12 @@ def checkout():
         )
         db.session.add(order_item)
 
+        # Reserve stock: decrement, but never go below 0.
+        # If quantity ordered exceeds available stock, stock just floors at 0 —
+        # the order still goes through as "Waiting for Stock" (handled above).
+        product = cart_item.product
+        product.stock_quantity = max(0, product.stock_quantity - cart_item.quantity)
+
     for cart_item in cart.items:
         db.session.delete(cart_item)
 
@@ -116,6 +122,10 @@ def cancel_order(order_id):
 
     if not order.can_cancel:
         return jsonify({"error": "This order can no longer be cancelled (past the 24-hour window)"}), 400
+
+    # Restore stock for every item in this order, since it's no longer reserved.
+    for item in order.items:
+        item.product.stock_quantity += item.quantity
 
     order.status = "Cancelled"
     db.session.commit()

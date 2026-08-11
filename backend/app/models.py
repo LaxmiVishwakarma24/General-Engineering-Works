@@ -215,3 +215,15 @@ class ContactMessage(db.Model):
     email = db.Column(db.String(150), nullable=False)
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Testimonial(db.Model):
+    __tablename__ = "testimonials"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    customer_name = db.Column(db.String(150), nullable=False)
+    company_name = db.Column(db.String(150), nullable=True)
+    quote_text = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Integer, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

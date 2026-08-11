@@ -83,7 +83,7 @@ body {
 .service-card-icon {
   display: flex;
   justify-content: center;
-  color: #b5651d; /* a warm, industrial rust/orange tone */
+  color: #b5651d;
   margin-bottom: 0.75rem;
 }
 
@@ -98,11 +98,6 @@ body {
   color: #5a6472;
   line-height: 1.4;
 }
-
-
-
-
-
 
 /* Navbar */
 .navbar {
@@ -174,7 +169,6 @@ body {
   background-color: #a05619;
 }
 
-
 /* Footer */
 .footer {
   background-color: #1e2a38;
@@ -224,9 +218,6 @@ body {
   border-top: 1px solid #3a4a5c;
   padding-top: 1.25rem;
 }
-
-
-
 
 /* Auth forms (Login/Signup) */
 .auth-form-container {
@@ -501,9 +492,17 @@ body {
   gap: 1rem;
 }
 
+.cart-item-info {
+  flex: 0 0 280px;
+  min-width: 0;
+}
+
 .cart-item-info h3 {
   font-size: 1rem;
   color: #1e2a38;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cart-item-info p {
@@ -768,8 +767,6 @@ body {
   color: #c0392b;
   border-top: 1px solid #eee;
 }
-
-
 
 /* Profile Page */
 .profile-page {
@@ -1266,4 +1263,9 @@ body {
 
 .view-all-link:hover {
   text-decoration: underline;
+}
+.quote-details-cell {
+  max-width: 250px;
+  white-space: normal;
+  word-wrap: break-word;
 }
