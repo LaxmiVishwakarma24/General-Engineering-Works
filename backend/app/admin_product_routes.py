@@ -9,6 +9,7 @@ from flask_login import login_required, current_user
 
 from app import db
 from app.models import Product, Category
+from app.notification_helpers import check_low_stock_and_notify
 
 admin_products_bp = Blueprint("admin_products", __name__)
 
@@ -91,6 +92,8 @@ def update_product(product_id):
         product.stock_quantity = data["stock_quantity"]
     if "minimum_stock" in data:
         product.minimum_stock = data["minimum_stock"]
+
+    check_low_stock_and_notify(product)
 
     db.session.commit()
 

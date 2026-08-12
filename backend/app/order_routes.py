@@ -16,6 +16,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 
 from app import db
 from app.models import Cart, Order, OrderItem
+from app.notification_helpers import check_low_stock_and_notify, create_notification
 
 orders_bp = Blueprint("orders", __name__)
 
@@ -87,6 +88,7 @@ def checkout():
         # the order still goes through as "Waiting for Stock" (handled above).
         product = cart_item.product
         product.stock_quantity = max(0, product.stock_quantity - cart_item.quantity)
+        check_low_stock_and_notify(product)
 
     for cart_item in cart.items:
         db.session.delete(cart_item)
@@ -255,6 +257,14 @@ def admin_update_order_status(order_id):
         order.delay_reason = data["delay_reason"]
     if "expected_delivery_date" in data:
         order.expected_delivery_date = datetime.fromisoformat(data["expected_delivery_date"]) if data["expected_delivery_date"] else None
+
+    create_notification(
+        recipient_type="customer",
+        recipient_id=order.customer_id,
+        message=f"Your order #{order.id} status changed to {new_status}",
+        notification_type="order_status",
+        related_order_id=order.id,
+    )
 
     db.session.commit()
 

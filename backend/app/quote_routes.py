@@ -12,6 +12,7 @@ from flask_login import login_required, current_user
 
 from app import db
 from app.models import QuoteRequest, Service
+from app.notification_helpers import create_notification
 
 quote_bp = Blueprint("quote", __name__)
 
@@ -101,6 +102,15 @@ def admin_update_quote_request_status(quote_request_id):
         return jsonify({"error": f"Invalid status. Must be one of: {', '.join(VALID_QUOTE_STATUSES)}"}), 400
 
     quote_request.status = new_status
+
+    create_notification(
+        recipient_type="customer",
+        recipient_id=quote_request.customer_id,
+        message=f"Your quote request for {quote_request.service.name} is now {new_status}",
+        notification_type="quote_status",
+        related_quote_id=quote_request.id,
+    )
+
     db.session.commit()
 
     return jsonify(serialize_quote_request(quote_request)), 200

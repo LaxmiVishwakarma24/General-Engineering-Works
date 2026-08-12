@@ -227,3 +227,25 @@ class Testimonial(db.Model):
     quote_text = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Notification(db.Model):
+    __tablename__ = "notifications"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # Who this notification is for. recipient_type is "admin" or "customer",
+    # recipient_id is the id in that respective table — mirrors the existing
+    # "admin-3"/"customer-7" pattern used in get_id().
+    recipient_type = db.Column(db.String(20), nullable=False)
+    recipient_id = db.Column(db.Integer, nullable=False)
+
+    message = db.Column(db.Text, nullable=False)
+    notification_type = db.Column(db.String(50), nullable=False)  # "order_status", "quote_status", "low_stock"
+    is_read = db.Column(db.Boolean, nullable=False, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Optional links so the UI can make a notification clickable.
+    related_order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=True)
+    related_quote_id = db.Column(db.Integer, db.ForeignKey("quote_requests.id"), nullable=True)
+    related_product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=True)
