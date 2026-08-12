@@ -40,6 +40,7 @@ function AdminCustomersPage({ user }) {
             <th>Company</th>
             <th>Joined</th>
             <th>Orders</th>
+            <th>Total Spent</th>
           </tr>
         </thead>
         <tbody>
@@ -51,6 +52,7 @@ function AdminCustomersPage({ user }) {
               <td>{customer.company_name || '—'}</td>
               <td>{new Date(customer.created_at).toLocaleDateString()}</td>
               <td>{customer.order_count}</td>
+              <td>₹{Number(customer.total_spent || 0).toLocaleString('en-IN')}</td>
             </tr>
           ))}
         </tbody>

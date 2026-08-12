@@ -193,7 +193,12 @@ def admin_list_customers():
 
     result = []
     for customer in customers:
-        order_count = Order.query.filter_by(customer_id=customer.id).count()
+        orders = Order.query.filter_by(customer_id=customer.id).all()
+        order_count = len(orders)
+        total_spent = sum(
+            float(order.total_amount) for order in orders
+            if order.status != "Cancelled"
+        )
         result.append({
             "id": customer.id,
             "name": customer.name,
@@ -202,6 +207,7 @@ def admin_list_customers():
             "company_name": customer.company_name,
             "created_at": customer.created_at.isoformat(),
             "order_count": order_count,
+            "total_spent": total_spent,
         })
 
     return jsonify(result), 200
