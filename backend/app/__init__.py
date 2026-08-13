@@ -82,6 +82,9 @@ def create_app():
     from app.testimonial_routes import testimonial_bp
     app.register_blueprint(testimonial_bp)
 
+    from app.notification_routes import notification_bp
+    app.register_blueprint(notification_bp)
+
     from app import models
 
     # Tells Flask-Login how to load a user from the session.

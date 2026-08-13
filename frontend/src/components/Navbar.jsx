@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import ProfileMenu from './ProfileMenu'
+import NotificationBell from './NotificationBell'
 
 /**
  * Navbar displays the site logo/name and navigation links.
@@ -13,7 +14,6 @@ function Navbar({ user, onLogoutClick }) {
       <div className="navbar-logo">
         <Link to="/" className="navbar-logo-link">General Engineering Works</Link>
       </div>
-
       <ul className="navbar-links">
         <li><Link to="/">Home</Link></li>
         <li><Link to="/products">Products</Link></li>
@@ -21,10 +21,12 @@ function Navbar({ user, onLogoutClick }) {
         <li><Link to="/machines">Machines</Link></li>
         <li><Link to="/contact">Contact</Link></li>
       </ul>
-
       <div className="navbar-right">
         {user ? (
-          <ProfileMenu user={user} onLogoutClick={onLogoutClick} />
+          <div className="navbar-right-logged-in">
+            <NotificationBell />
+            <ProfileMenu user={user} onLogoutClick={onLogoutClick} />
+          </div>
         ) : (
           <div className="navbar-auth-links">
             <Link to="/login" className="navbar-action">Login</Link>
