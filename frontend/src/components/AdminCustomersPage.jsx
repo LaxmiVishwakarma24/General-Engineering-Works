@@ -16,7 +16,7 @@ function AdminCustomersPage({ user }) {
       credentials: 'include',
     })
       .then((response) => response.json())
-      .then((data) => setCustomers(data.customers))
+      .then((data) => setCustomers(data))
       .catch((err) => {
         setError('Could not load customers')
         console.error(err)

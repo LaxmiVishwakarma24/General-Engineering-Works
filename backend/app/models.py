@@ -249,3 +249,17 @@ class Notification(db.Model):
     related_order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=True)
     related_quote_id = db.Column(db.Integer, db.ForeignKey("quote_requests.id"), nullable=True)
     related_product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=True)
+
+
+class WebsiteSettings(db.Model):
+    __tablename__ = "website_settings"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    logo_url = db.Column(db.String(300), nullable=True)
+    business_hours = db.Column(db.Text, nullable=True)
+    contact_phone = db.Column(db.String(20), nullable=True)
+    contact_email = db.Column(db.String(150), nullable=True)
+    contact_address = db.Column(db.Text, nullable=True)
+
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

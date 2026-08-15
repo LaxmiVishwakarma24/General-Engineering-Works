@@ -62,6 +62,9 @@ function ProfileMenu({ user, onLogoutClick }) {
               <Link to="/admin/customers" className="profile-menu-item" onClick={() => setIsOpen(false)}>
                 Customers
               </Link>
+              <Link to="/admin/settings" className="profile-menu-item" onClick={() => setIsOpen(false)}>
+                Settings
+              </Link>
             </>
           )}
 
