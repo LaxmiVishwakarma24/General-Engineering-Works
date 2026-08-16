@@ -19,6 +19,7 @@ function Navbar({ user, onLogoutClick }) {
         <li><Link to="/products">Products</Link></li>
         <li><Link to="/services">Services</Link></li>
         <li><Link to="/machines">Machines</Link></li>
+        <li><Link to="/testimonials">Testimonials</Link></li>
         <li><Link to="/contact">Contact</Link></li>
       </ul>
       <div className="navbar-right">

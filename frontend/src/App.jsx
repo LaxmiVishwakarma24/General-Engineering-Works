@@ -4,6 +4,7 @@ import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Footer from './components/Footer'
 import ServicesPreview from './components/ServicesPreview'
+import TestimonialsSection from './components/TestimonialsSection'
 import CustomerLogin from './components/CustomerLogin'
 import AdminLogin from './components/AdminLogin'
 import Signup from './components/Signup'
@@ -22,6 +23,8 @@ import ContactPage from './components/ContactPage'
 import AdminQuoteRequestsPage from './components/AdminQuoteRequestsPage'
 import AdminCustomersPage from './components/AdminCustomersPage'
 import AdminSettingsPage from './components/AdminSettingsPage'
+import AdminTestimonialsPage from './components/AdminTestimonialsPage'
+import TestimonialsPage from './components/TestimonialsPage'
 import './App.css'
 
 function HomePage({ apiStatus, apiMessage }) {
@@ -30,6 +33,8 @@ function HomePage({ apiStatus, apiMessage }) {
       <Hero />
 
       <ServicesPreview />
+
+      <TestimonialsSection limit={3} />
 
       <section className="connection-status">
         <p>
@@ -109,6 +114,8 @@ function App() {
           <Route path="/admin/quote-requests" element={<AdminQuoteRequestsPage user={user} />} />
           <Route path="/admin/customers" element={<AdminCustomersPage user={user} />} />
           <Route path="/admin/settings" element={<AdminSettingsPage user={user} />} />
+          <Route path="/admin/testimonials" element={<AdminTestimonialsPage user={user} />} />
+          <Route path="/testimonials" element={<TestimonialsPage />} />
         </Routes>
 
         <Footer />
