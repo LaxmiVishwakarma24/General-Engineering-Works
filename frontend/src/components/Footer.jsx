@@ -1,9 +1,19 @@
+import { useState, useEffect } from 'react'
+
 /**
  * Footer displays business info and contact details at the bottom of every page.
- * Contact details below are placeholders — update with real info when available.
+ * Contact details are pulled live from the admin-editable Website Settings.
  */
 function Footer() {
   const currentYear = new Date().getFullYear()
+  const [settings, setSettings] = useState(null)
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/website-settings')
+      .then((res) => res.json())
+      .then((data) => setSettings(data))
+      .catch((err) => console.error('Failed to load website settings:', err))
+  }, [])
 
   return (
     <footer className="footer">
@@ -15,9 +25,10 @@ function Footer() {
 
         <div className="footer-column">
           <h4>Contact</h4>
-          <p>Phone: (placeholder)</p>
-          <p>Email: (placeholder)</p>
-          <p>Address: (placeholder)</p>
+          <p>Phone: {settings?.contact_phone || 'Not available'}</p>
+          <p>Email: {settings?.contact_email || 'Not available'}</p>
+          <p>Address: {settings?.contact_address || 'Not available'}</p>
+          {settings?.business_hours && <p>Hours: {settings.business_hours}</p>}
         </div>
 
         <div className="footer-column">

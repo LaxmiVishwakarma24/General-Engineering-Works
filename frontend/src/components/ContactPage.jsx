@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function ContactPage() {
   const [name, setName] = useState('')
@@ -7,6 +7,14 @@ function ContactPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [settings, setSettings] = useState(null)
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/website-settings')
+      .then((res) => res.json())
+      .then((data) => setSettings(data))
+      .catch((err) => console.error('Failed to load website settings:', err))
+  }, [])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -53,6 +61,15 @@ function ContactPage() {
       <p className="products-page-subtitle">
         Have a question or need to reach us? Send a message below.
       </p>
+
+      {settings && (settings.contact_phone || settings.contact_email || settings.contact_address || settings.business_hours) && (
+        <div className="profile-section" style={{ maxWidth: 500, margin: '0 auto 2rem auto' }}>
+          {settings.contact_phone && <p><strong>Phone:</strong> {settings.contact_phone}</p>}
+          {settings.contact_email && <p><strong>Email:</strong> {settings.contact_email}</p>}
+          {settings.contact_address && <p><strong>Address:</strong> {settings.contact_address}</p>}
+          {settings.business_hours && <p><strong>Hours:</strong> {settings.business_hours}</p>}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="auth-form">
         <label>
