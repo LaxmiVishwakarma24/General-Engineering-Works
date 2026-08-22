@@ -4,7 +4,9 @@ quote_routes.py
 Customer-facing endpoint for submitting a quote request, optionally with
 an attachment (drawing/blueprint) uploaded via /api/customer/upload-attachment.
 
-Also includes admin-only endpoints for viewing and updating quote requests.
+Also includes admin-only endpoints for viewing and updating quote requests,
+and a customer endpoint for re-uploading a revised drawing when the admin
+has requested changes.
 """
 
 from flask import Blueprint, request, jsonify
@@ -26,6 +28,7 @@ def serialize_quote_request(qr):
         "details": qr.details,
         "attachment_url": qr.attachment_url,
         "status": qr.status,
+        "admin_notes": qr.admin_notes,
         "created_at": qr.created_at.isoformat(),
     }
 
@@ -62,7 +65,70 @@ def create_quote_request():
     }), 201
 
 
-VALID_QUOTE_STATUSES = ["new", "reviewed", "quoted", "closed"]
+@quote_bp.route("/api/quote-requests/mine", methods=["GET"])
+@login_required
+def list_my_quote_requests():
+    """Customer-only: view all of the logged-in customer's own quote requests."""
+    if current_user.get_id().split("-")[0] != "customer":
+        return jsonify({"error": "Customer access required"}), 403
+
+    quote_requests = (
+        QuoteRequest.query
+        .filter_by(customer_id=current_user.id)
+        .order_by(QuoteRequest.created_at.desc())
+        .all()
+    )
+
+    return jsonify([serialize_quote_request(qr) for qr in quote_requests]), 200
+
+
+@quote_bp.route("/api/quote-requests/<int:quote_request_id>", methods=["GET"])
+@login_required
+def get_quote_request(quote_request_id):
+    """Customer-only: view one of their own quote requests, including admin notes."""
+    if current_user.get_id().split("-")[0] != "customer":
+        return jsonify({"error": "Customer access required"}), 403
+
+    quote_request = QuoteRequest.query.get(quote_request_id)
+
+    if not quote_request or quote_request.customer_id != current_user.id:
+        return jsonify({"error": "Quote request not found"}), 404
+
+    return jsonify(serialize_quote_request(quote_request)), 200
+
+
+@quote_bp.route("/api/quote-requests/<int:quote_request_id>/attachment", methods=["PUT"])
+@login_required
+def update_quote_request_attachment(quote_request_id):
+    """
+    Customer-only: re-upload a revised drawing/attachment on their own quote
+    request, and move status back to "new" so the admin knows to review it
+    again. Only allowed while status is "changes_requested".
+    """
+    if current_user.get_id().split("-")[0] != "customer":
+        return jsonify({"error": "Customer access required"}), 403
+
+    quote_request = QuoteRequest.query.get(quote_request_id)
+
+    if not quote_request or quote_request.customer_id != current_user.id:
+        return jsonify({"error": "Quote request not found"}), 404
+
+    if quote_request.status != "changes_requested":
+        return jsonify({"error": "You can only re-upload when changes have been requested"}), 400
+
+    data = request.get_json()
+    if not data.get("attachment_url"):
+        return jsonify({"error": "attachment_url is required"}), 400
+
+    quote_request.attachment_url = data["attachment_url"]
+    quote_request.status = "new"
+
+    db.session.commit()
+
+    return jsonify(serialize_quote_request(quote_request)), 200
+
+
+VALID_QUOTE_STATUSES = ["new", "reviewed", "quoted", "approved", "changes_requested", "rejected", "closed"]
 
 
 @quote_bp.route("/api/admin/quote-requests", methods=["GET"])
@@ -87,7 +153,7 @@ def admin_list_quote_requests():
 @quote_bp.route("/api/admin/quote-requests/<int:quote_request_id>/status", methods=["PUT"])
 @login_required
 def admin_update_quote_request_status(quote_request_id):
-    """Admin: update a quote request's status."""
+    """Admin: update a quote request's status, optionally with review notes."""
     if current_user.get_id().split("-")[0] != "admin":
         return jsonify({"error": "Admin access required"}), 403
 
@@ -102,6 +168,9 @@ def admin_update_quote_request_status(quote_request_id):
         return jsonify({"error": f"Invalid status. Must be one of: {', '.join(VALID_QUOTE_STATUSES)}"}), 400
 
     quote_request.status = new_status
+
+    if "admin_notes" in data:
+        quote_request.admin_notes = data["admin_notes"]
 
     create_notification(
         recipient_type="customer",

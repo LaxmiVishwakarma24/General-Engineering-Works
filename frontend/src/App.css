@@ -1429,3 +1429,18 @@ body {
   font-weight: 400;
   color: #5a6472;
 }
+/* Quote request status colors */
+.order-status-changes-requested {
+  background-color: #fff3e0;
+  color: #b5651d;
+}
+
+.order-status-approved {
+  background-color: #e3f5e6;
+  color: #2e7d32;
+}
+
+.order-status-rejected {
+  background-color: #fdeaea;
+  color: #c0392b;
+}

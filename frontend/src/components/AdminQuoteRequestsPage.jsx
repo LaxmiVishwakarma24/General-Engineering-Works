@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-const STATUS_OPTIONS = ['new', 'reviewed', 'quoted', 'closed']
+const STATUS_OPTIONS = ['new', 'reviewed', 'quoted', 'approved', 'changes_requested', 'rejected', 'closed']
 
 function AdminQuoteRequestsPage({ user }) {
   const [quoteRequests, setQuoteRequests] = useState([])
   const [error, setError] = useState('')
+  const [notesDraft, setNotesDraft] = useState({})
   const navigate = useNavigate()
 
   const loadQuoteRequests = () => {
@@ -34,7 +35,10 @@ function AdminQuoteRequestsPage({ user }) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({
+          status: newStatus,
+          admin_notes: notesDraft[quoteRequestId] ?? undefined,
+        }),
       })
 
       if (response.ok) {
@@ -46,6 +50,10 @@ function AdminQuoteRequestsPage({ user }) {
     } catch (err) {
       console.error('Status update error:', err)
     }
+  }
+
+  const handleNotesChange = (quoteRequestId, value) => {
+    setNotesDraft({ ...notesDraft, [quoteRequestId]: value })
   }
 
   return (
@@ -65,6 +73,7 @@ function AdminQuoteRequestsPage({ user }) {
             <th>Attachment</th>
             <th>Submitted</th>
             <th>Status</th>
+            <th>Notes to customer</th>
           </tr>
         </thead>
         <tbody>
@@ -76,7 +85,7 @@ function AdminQuoteRequestsPage({ user }) {
                 <span className="admin-order-email">{qr.customer_email}</span>
               </td>
               <td>{qr.service_name}</td>
-              <td>{qr.details || '—'}</td>
+              <td className="quote-details-cell">{qr.details || '—'}</td>
               <td>
                 {qr.attachment_url ? (
                   <a href={qr.attachment_url} target="_blank" rel="noopener noreferrer">
@@ -94,9 +103,18 @@ function AdminQuoteRequestsPage({ user }) {
                   className="admin-status-select"
                 >
                   {STATUS_OPTIONS.map((status) => (
-                    <option key={status} value={status}>{status}</option>
+                    <option key={status} value={status}>{status.replace('_', ' ')}</option>
                   ))}
                 </select>
+              </td>
+              <td className="quote-details-cell">
+                <textarea
+                  rows={2}
+                  placeholder="Notes for the customer (optional)"
+                  defaultValue={qr.admin_notes || ''}
+                  onChange={(e) => handleNotesChange(qr.id, e.target.value)}
+                  style={{ width: '100%', fontFamily: 'inherit', fontSize: '0.85rem' }}
+                />
               </td>
             </tr>
           ))}

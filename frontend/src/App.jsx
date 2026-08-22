@@ -25,6 +25,7 @@ import AdminCustomersPage from './components/AdminCustomersPage'
 import AdminSettingsPage from './components/AdminSettingsPage'
 import AdminTestimonialsPage from './components/AdminTestimonialsPage'
 import TestimonialsPage from './components/TestimonialsPage'
+import MyQuoteRequestsPage from './components/MyQuoteRequestsPage'
 import './App.css'
 
 function HomePage({ apiStatus, apiMessage }) {
@@ -116,6 +117,7 @@ function App() {
           <Route path="/admin/settings" element={<AdminSettingsPage user={user} />} />
           <Route path="/admin/testimonials" element={<AdminTestimonialsPage user={user} />} />
           <Route path="/testimonials" element={<TestimonialsPage />} />
+          <Route path="/my-quote-requests" element={<MyQuoteRequestsPage user={user} />} />
         </Routes>
 
         <Footer />

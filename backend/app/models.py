@@ -72,6 +72,7 @@ class QuoteRequest(db.Model):
     details = db.Column(db.Text, nullable=True)
     attachment_url = db.Column(db.String(300), nullable=True)
     status = db.Column(db.String(50), nullable=False, default="new")
+    admin_notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
